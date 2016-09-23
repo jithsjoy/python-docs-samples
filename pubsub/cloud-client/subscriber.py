@@ -26,47 +26,6 @@ import argparse
 from gcloud import pubsub
 
 
-def list_subscriptions(topic_name):
-    """Lists all subscriptions for a given topic."""
-    pubsub_client = pubsub.Client()
-    topic = pubsub_client.topic(topic_name)
-
-    subscriptions = []
-    next_page_token = None
-    while True:
-        page, next_page_token = topic.list_subscriptions()
-        subscriptions.extend(page)
-        if not next_page_token:
-            break
-
-    for subscription in subscriptions:
-        print(subscription.name)
-
-
-def create_subscription(topic_name, subscription_name):
-    """Create a new pull subscription on the given topic."""
-    pubsub_client = pubsub.Client()
-    topic = pubsub_client.topic(topic_name)
-
-    subscription = topic.subscription(subscription_name)
-    subscription.create()
-
-    print('Subscription {} created on topic {}.'.format(
-        subscription.name, topic.name))
-
-
-def delete_subscription(topic_name, subscription_name):
-    """Deletes an existing Pub/Sub topic."""
-    pubsub_client = pubsub.Client()
-    topic = pubsub_client.topic(topic_name)
-    subscription = topic.subscription(subscription_name)
-
-    subscription.delete()
-
-    print('Subscription {} deleted on topic {}.'.format(
-        subscription.name, topic.name))
-
-
 def receive_message(topic_name, subscription_name):
     """Receives a message from a pull subscription."""
     pubsub_client = pubsub.Client()
@@ -96,19 +55,6 @@ if __name__ == '__main__':
     )
 
     subparsers = parser.add_subparsers(dest='command')
-    list_parser = subparsers.add_parser(
-        'list', help=list_subscriptions.__doc__)
-    list_parser.add_argument('topic_name')
-
-    create_parser = subparsers.add_parser(
-        'create', help=create_subscription.__doc__)
-    create_parser.add_argument('topic_name')
-    create_parser.add_argument('subscription_name')
-
-    delete_parser = subparsers.add_parser(
-        'delete', help=delete_subscription.__doc__)
-    delete_parser.add_argument('topic_name')
-    delete_parser.add_argument('subscription_name')
 
     receive_parser = subparsers.add_parser(
         'receive', help=receive_message.__doc__)
@@ -117,11 +63,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.command == 'list':
-        list_subscriptions(args.topic_name)
-    elif args.command == 'create':
-        create_subscription(args.topic_name, args.subscription_name)
-    elif args.command == 'delete':
-        delete_subscription(args.topic_name, args.subscription_name)
-    elif args.command == 'receive':
+    if args.command == 'receive':
         receive_message(args.topic_name, args.subscription_name)

@@ -26,42 +26,6 @@ import argparse
 from gcloud import pubsub
 
 
-def list_topics():
-    """Lists all Pub/Sub topics in the current project."""
-    pubsub_client = pubsub.Client()
-
-    topics = []
-    next_page_token = None
-    while True:
-        page, next_page_token = pubsub_client.list_topics()
-        topics.extend(page)
-        if not next_page_token:
-            break
-
-    for topic in topics:
-        print(topic.name)
-
-
-def create_topic(topic_name):
-    """Create a new Pub/Sub topic."""
-    pubsub_client = pubsub.Client()
-    topic = pubsub_client.topic(topic_name)
-
-    topic.create()
-
-    print('Topic {} created.'.format(topic.name))
-
-
-def delete_topic(topic_name):
-    """Deletes an existing Pub/Sub topic."""
-    pubsub_client = pubsub.Client()
-    topic = pubsub_client.topic(topic_name)
-
-    topic.delete()
-
-    print('Topic {} deleted.'.format(topic.name))
-
-
 def publish_message(topic_name, data):
     """Publishes a message to a Pub/Sub topic with the given data."""
     pubsub_client = pubsub.Client()
@@ -82,13 +46,6 @@ if __name__ == '__main__':
     )
 
     subparsers = parser.add_subparsers(dest='command')
-    subparsers.add_parser('list', help=list_topics.__doc__)
-
-    create_parser = subparsers.add_parser('create', help=create_topic.__doc__)
-    create_parser.add_argument('topic_name')
-
-    delete_parser = subparsers.add_parser('delete', help=delete_topic.__doc__)
-    delete_parser.add_argument('topic_name')
 
     publish_parser = subparsers.add_parser(
         'publish', help=publish_message.__doc__)
@@ -97,11 +54,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.command == 'list':
-        list_topics()
-    elif args.command == 'create':
-        create_topic(args.topic_name)
-    elif args.command == 'delete':
-        delete_topic(args.topic_name)
-    elif args.command == 'publish':
+    if args.command == 'publish':
         publish_message(args.topic_name, args.data)
